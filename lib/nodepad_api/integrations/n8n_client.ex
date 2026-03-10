@@ -19,6 +19,12 @@ defmodule NodepadApi.Integrations.N8nClient do
     |> handle_response()
   end
 
+  def list_credentials(base_url, api_key) do
+    client(base_url, api_key)
+    |> Req.get(url: "/api/v1/credentials")
+    |> handle_response()
+  end
+
   def activate_workflow(base_url, api_key, workflow_id) do
     client(base_url, api_key)
     |> Req.post(url: "/api/v1/workflows/#{workflow_id}/activate")

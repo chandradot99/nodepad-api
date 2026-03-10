@@ -32,6 +32,7 @@ defmodule NodepadApiWeb.Router do
     get "/workspaces/:workspace_id/connections", ConnectionController, :index
     post "/workspaces/:workspace_id/connections", ConnectionController, :create
     get "/connections/:id/test", ConnectionController, :test
+    get "/connections/:id/credentials", ConnectionController, :credentials
     delete "/connections/:id", ConnectionController, :delete
 
     # Workflows

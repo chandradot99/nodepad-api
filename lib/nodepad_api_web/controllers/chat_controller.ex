@@ -1,9 +1,9 @@
 defmodule NodepadApiWeb.ChatController do
   use NodepadApiWeb, :controller
 
-  alias NodepadApi.{Chat, Workflows}
+  alias NodepadApi.{Chat, Workflows, Workspaces}
   alias NodepadApi.Auth.Guardian
-  alias NodepadApi.Integrations.ClaudeClient
+  alias NodepadApi.Integrations.{ClaudeClient, N8nClient}
 
   def create_conversation(conn, %{"workflow_id" => workflow_id} = params) do
     user = Guardian.Plug.current_resource(conn)
@@ -29,6 +29,18 @@ defmodule NodepadApiWeb.ChatController do
     _user = Guardian.Plug.current_resource(conn)
     conversation = Chat.get_conversation(conversation_id)
     workflow = Workflows.get_workflow(conversation.workflow_id)
+    connection = Workspaces.get_connection(workflow.connection_id)
+    api_key = Workspaces.decrypt_api_key(connection)
+
+    # Fetch available credentials from n8n (best-effort, don't fail if unavailable)
+    credentials_context =
+      case N8nClient.list_credentials(connection.base_url, api_key) do
+        {:ok, %{"data" => creds}} ->
+          cred_lines = Enum.map(creds, fn c -> "- #{c["name"]} (type: #{c["type"]}, id: #{c["id"]})" end)
+          "\n\nAvailable credentials in this n8n instance:\n#{Enum.join(cred_lines, "\n")}"
+        _ ->
+          ""
+      end
 
     # Save user message
     {:ok, _} = Chat.create_message(%{role: "user", content: content, conversation_id: conversation_id})
@@ -40,8 +52,9 @@ defmodule NodepadApiWeb.ChatController do
     system_prompt = """
     You are an expert n8n workflow assistant. You help users modify and improve their n8n workflows.
     When asked to make changes, respond with the complete updated workflow JSON inside a ```json``` code block.
+    When adding nodes that require credentials, use the available credentials listed below — match by type.
     Current workflow:
-    #{Jason.encode!(workflow.data, pretty: true)}
+    #{Jason.encode!(workflow.data, pretty: true)}#{credentials_context}
     """
 
     case ClaudeClient.chat(claude_api_key, messages, system_prompt) do

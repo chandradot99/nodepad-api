@@ -31,6 +31,18 @@ defmodule NodepadApiWeb.ConnectionController do
     end
   end
 
+  def credentials(conn, %{"id" => id}) do
+    connection = Workspaces.get_connection(id)
+    api_key = Workspaces.decrypt_api_key(connection)
+
+    case N8nClient.list_credentials(connection.base_url, api_key) do
+      {:ok, %{"data" => creds}} ->
+        json(conn, Enum.map(creds, &Map.take(&1, ["id", "name", "type"])))
+      {:error, reason} ->
+        conn |> put_status(:bad_gateway) |> json(%{error: inspect(reason)})
+    end
+  end
+
   def delete(conn, %{"id" => id}) do
     case Workspaces.get_connection(id) do
       nil -> conn |> put_status(:not_found) |> json(%{error: "Connection not found"})
