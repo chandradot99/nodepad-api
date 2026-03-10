@@ -35,12 +35,13 @@ defmodule NodepadApiWeb.ConnectionController do
     connection = Workspaces.get_connection(id)
     api_key = Workspaces.decrypt_api_key(connection)
 
-    case N8nClient.list_credentials(connection.base_url, api_key) do
-      {:ok, %{"data" => creds}} ->
-        json(conn, Enum.map(creds, &Map.take(&1, ["id", "name", "type"])))
-      {:error, reason} ->
-        conn |> put_status(:bad_gateway) |> json(%{error: inspect(reason)})
-    end
+    creds =
+      case N8nClient.list_credentials(connection.base_url, api_key) do
+        {:ok, %{"data" => data}} -> Enum.map(data, &Map.take(&1, ["id", "name", "type"]))
+        _ -> []
+      end
+
+    json(conn, creds)
   end
 
   def delete(conn, %{"id" => id}) do
