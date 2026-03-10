@@ -48,6 +48,7 @@ defmodule NodepadApiWeb.Router do
     # Chat
     get "/workflows/:workflow_id/conversations", ChatController, :list_conversations
     post "/workflows/:workflow_id/conversations", ChatController, :create_conversation
+    get "/conversations/:conversation_id/messages", ChatController, :list_messages
     post "/conversations/:conversation_id/messages", ChatController, :send_message
   end
 

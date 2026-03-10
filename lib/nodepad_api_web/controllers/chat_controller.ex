@@ -20,6 +20,11 @@ defmodule NodepadApiWeb.ChatController do
     json(conn, conversations)
   end
 
+  def list_messages(conn, %{"conversation_id" => conversation_id}) do
+    messages = Chat.list_messages(conversation_id)
+    json(conn, messages)
+  end
+
   def send_message(conn, %{"conversation_id" => conversation_id, "content" => content, "claude_api_key" => claude_api_key}) do
     _user = Guardian.Plug.current_resource(conn)
     conversation = Chat.get_conversation(conversation_id)
