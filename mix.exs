@@ -52,7 +52,9 @@ defmodule NodepadApi.MixProject do
       # CORS for React frontend
       {:cors_plug, "~> 3.0"},
       # Password hashing
-      {:bcrypt_elixir, "~> 3.0"}
+      {:bcrypt_elixir, "~> 3.0"},
+      # Auto-load .env in dev
+      {:dotenvy, "~> 0.8.0", only: [:dev, :test]}
     ]
   end
 

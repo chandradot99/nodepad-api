@@ -2,6 +2,7 @@ defmodule NodepadApi.Workflows.Workflow do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @derive {Jason.Encoder, only: [:id, :n8n_workflow_id, :name, :active, :data, :connection_id, :inserted_at, :updated_at]}
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 

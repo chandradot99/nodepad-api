@@ -20,5 +20,5 @@ defmodule NodepadApiWeb.Gettext do
 
   See the [Gettext Docs](https://hexdocs.pm/gettext) for detailed usage.
   """
-  use Gettext, otp_app: :nodepad_api
+  use Gettext, otp_app: :nodepad_api, backend: NodepadApiWeb.Gettext
 end

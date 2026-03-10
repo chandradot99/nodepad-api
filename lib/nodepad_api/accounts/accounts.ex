@@ -1,5 +1,4 @@
 defmodule NodepadApi.Accounts do
-  import Ecto.Query
   alias NodepadApi.Repo
   alias NodepadApi.Accounts.User
 

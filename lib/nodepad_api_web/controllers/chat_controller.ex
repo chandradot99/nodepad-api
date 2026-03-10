@@ -21,7 +21,7 @@ defmodule NodepadApiWeb.ChatController do
   end
 
   def send_message(conn, %{"conversation_id" => conversation_id, "content" => content, "claude_api_key" => claude_api_key}) do
-    user = Guardian.Plug.current_resource(conn)
+    _user = Guardian.Plug.current_resource(conn)
     conversation = Chat.get_conversation(conversation_id)
     workflow = Workflows.get_workflow(conversation.workflow_id)
 
