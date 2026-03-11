@@ -1,10 +1,30 @@
 defmodule NodepadApi.Accounts do
+  import Ecto.Changeset
   alias NodepadApi.Repo
   alias NodepadApi.Accounts.User
 
   def get_user(id), do: Repo.get(User, id)
 
   def get_user_by_email(email), do: Repo.get_by(User, email: email)
+
+  def get_user_by_extension_token(token) when is_binary(token) do
+    Repo.get_by(User, extension_token: token)
+  end
+
+  def generate_extension_token(user) do
+    token = :crypto.strong_rand_bytes(32) |> Base.url_encode64(padding: false)
+
+    user
+    |> change(%{extension_token: token})
+    |> unique_constraint(:extension_token)
+    |> Repo.update()
+  end
+
+  def revoke_extension_token(user) do
+    user
+    |> change(%{extension_token: nil})
+    |> Repo.update()
+  end
 
   def create_user(attrs) do
     %User{}

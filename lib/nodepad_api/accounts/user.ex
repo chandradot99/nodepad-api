@@ -11,6 +11,7 @@ defmodule NodepadApi.Accounts.User do
     field :email, :string
     field :password, :string, virtual: true
     field :password_hash, :string
+    field :extension_token, :string
 
     has_many :workspaces, NodepadApi.Workspaces.Workspace
     has_many :drafts, NodepadApi.Workflows.Draft

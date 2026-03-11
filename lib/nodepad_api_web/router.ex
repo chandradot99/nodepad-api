@@ -9,6 +9,10 @@ defmodule NodepadApiWeb.Router do
     plug NodepadApi.Auth.Pipeline
   end
 
+  pipeline :extension_auth do
+    plug NodepadApiWeb.Plugs.ExtensionAuth
+  end
+
   # Public routes
   scope "/api", NodepadApiWeb do
     pipe_through :api
@@ -48,11 +52,23 @@ defmodule NodepadApiWeb.Router do
     post "/drafts/:id/push", DraftController, :push
     delete "/drafts/:id", DraftController, :delete
 
+    # Extension token management
+    get "/extension-token/status", ExtensionController, :token_status
+    post "/extension-token", ExtensionController, :generate_token
+    delete "/extension-token", ExtensionController, :revoke_token
+
     # Chat
     get "/workflows/:workflow_id/conversations", ChatController, :list_conversations
     post "/workflows/:workflow_id/conversations", ChatController, :create_conversation
     get "/conversations/:conversation_id/messages", ChatController, :list_messages
     post "/conversations/:conversation_id/messages", ChatController, :send_message
+  end
+
+  # Extension sync (uses extension token, not JWT)
+  scope "/api", NodepadApiWeb do
+    pipe_through [:api, :extension_auth]
+
+    post "/sync/nodes", ExtensionController, :sync_nodes
   end
 
   if Application.compile_env(:nodepad_api, :dev_routes) do
