@@ -21,6 +21,29 @@ defmodule NodepadApiWeb.ConnectionController do
     end
   end
 
+  def update(conn, %{"id" => id} = params) do
+    user = Guardian.Plug.current_resource(conn)
+
+    case Workspaces.get_connection_for_user(id, user.id) do
+      nil ->
+        conn |> put_status(:not_found) |> json(%{error: "Connection not found"})
+
+      connection ->
+        case Workspaces.update_connection(connection, params) do
+          {:ok, updated} ->
+            json(conn, %{
+              id: updated.id,
+              name: updated.name,
+              base_url: updated.base_url,
+              workspace_id: updated.workspace_id
+            })
+
+          {:error, changeset} ->
+            conn |> put_status(:unprocessable_entity) |> json(%{errors: format_errors(changeset)})
+        end
+    end
+  end
+
   def test(conn, %{"id" => id}) do
     connection = Workspaces.get_connection(id)
     api_key = Workspaces.decrypt_api_key(connection)

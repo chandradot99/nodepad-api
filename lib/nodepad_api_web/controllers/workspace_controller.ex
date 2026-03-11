@@ -22,6 +22,24 @@ defmodule NodepadApiWeb.WorkspaceController do
     end
   end
 
+  def update(conn, %{"id" => id} = params) do
+    user = Guardian.Plug.current_resource(conn)
+
+    case Workspaces.get_workspace(id, user.id) do
+      nil ->
+        conn |> put_status(:not_found) |> json(%{error: "Workspace not found"})
+
+      workspace ->
+        case Workspaces.update_workspace(workspace, params) do
+          {:ok, updated} ->
+            json(conn, updated)
+
+          {:error, changeset} ->
+            conn |> put_status(:unprocessable_entity) |> json(%{errors: format_errors(changeset)})
+        end
+    end
+  end
+
   def delete(conn, %{"id" => id}) do
     user = Guardian.Plug.current_resource(conn)
 

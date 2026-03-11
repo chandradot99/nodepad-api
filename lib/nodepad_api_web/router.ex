@@ -26,11 +26,13 @@ defmodule NodepadApiWeb.Router do
     # Workspaces
     get "/workspaces", WorkspaceController, :index
     post "/workspaces", WorkspaceController, :create
+    patch "/workspaces/:id", WorkspaceController, :update
     delete "/workspaces/:id", WorkspaceController, :delete
 
     # Connections (n8n instances)
     get "/workspaces/:workspace_id/connections", ConnectionController, :index
     post "/workspaces/:workspace_id/connections", ConnectionController, :create
+    patch "/connections/:id", ConnectionController, :update
     get "/connections/:id/test", ConnectionController, :test
     get "/connections/:id/credentials", ConnectionController, :credentials
     delete "/connections/:id", ConnectionController, :delete

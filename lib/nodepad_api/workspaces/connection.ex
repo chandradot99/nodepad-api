@@ -26,6 +26,15 @@ defmodule NodepadApi.Workspaces.Connection do
     |> encrypt_api_key()
   end
 
+  # Update changeset — api_key is optional (omit to keep existing key)
+  def update_changeset(connection, attrs) do
+    connection
+    |> cast(attrs, [:name, :base_url, :api_key])
+    |> validate_required([:base_url])
+    |> validate_format(:base_url, ~r/^https?:\/\//, message: "must be a valid URL")
+    |> encrypt_api_key()
+  end
+
   defp encrypt_api_key(%Ecto.Changeset{valid?: true, changes: %{api_key: key}} = changeset) do
     put_change(changeset, :encrypted_api_key, NodepadApi.Encryption.encrypt(key))
   end

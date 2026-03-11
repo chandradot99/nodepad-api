@@ -20,4 +20,10 @@ defmodule NodepadApi.Workspaces.Workspace do
     |> cast(attrs, [:name, :user_id])
     |> validate_required([:name, :user_id])
   end
+
+  def update_changeset(workspace, attrs) do
+    workspace
+    |> cast(attrs, [:name])
+    |> validate_required([:name])
+  end
 end
