@@ -39,7 +39,6 @@ defmodule NodepadApiWeb.ExtensionController do
   def sync_nodes(conn, %{"base_url" => base_url, "nodes" => nodes}) do
     user = conn.assigns.current_user
 
-    # Find connection matching base_url for this user
     case Workspaces.get_connection_by_base_url(user.id, base_url) do
       nil ->
         conn
@@ -47,12 +46,52 @@ defmodule NodepadApiWeb.ExtensionController do
         |> json(%{error: "No connection found for #{base_url}. Make sure the n8n URL matches your workspace connection."})
 
       connection ->
-        {upserted, _} = Workspaces.upsert_node_schemas(connection.id, nodes)
-        json(conn, %{synced: upserted, connection_id: connection.id})
+        {upserted, linked} = Workspaces.upsert_nodes(connection.id, nodes)
+        json(conn, %{synced: upserted, linked: linked, connection_id: connection.id})
     end
   end
 
   def sync_nodes(conn, _params) do
     conn |> put_status(:bad_request) |> json(%{error: "Missing base_url or nodes"})
+  end
+
+  # POST /api/sync/credential-types — sync credential type definitions (extension token auth)
+  def sync_credential_types(conn, %{"base_url" => base_url, "credential_types" => credential_types}) do
+    user = conn.assigns.current_user
+
+    case Workspaces.get_connection_by_base_url(user.id, base_url) do
+      nil ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "No connection found for #{base_url}."})
+
+      _connection ->
+        upserted = Workspaces.upsert_credential_types(credential_types)
+        json(conn, %{synced: upserted})
+    end
+  end
+
+  def sync_credential_types(conn, _params) do
+    conn |> put_status(:bad_request) |> json(%{error: "Missing base_url or credential_types"})
+  end
+
+  # POST /api/sync/saved-credentials — sync saved credential instances (extension token auth)
+  def sync_saved_credentials(conn, %{"base_url" => base_url, "credentials" => credentials}) do
+    user = conn.assigns.current_user
+
+    case Workspaces.get_connection_by_base_url(user.id, base_url) do
+      nil ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "No connection found for #{base_url}."})
+
+      connection ->
+        upserted = Workspaces.upsert_saved_credentials(connection.id, credentials)
+        json(conn, %{synced: upserted, connection_id: connection.id})
+    end
+  end
+
+  def sync_saved_credentials(conn, _params) do
+    conn |> put_status(:bad_request) |> json(%{error: "Missing base_url or credentials"})
   end
 end

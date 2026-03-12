@@ -39,6 +39,8 @@ defmodule NodepadApiWeb.Router do
     patch "/connections/:id", ConnectionController, :update
     get "/connections/:id/test", ConnectionController, :test
     get "/connections/:id/credentials", ConnectionController, :credentials
+    get "/connections/:id/saved-credentials", ConnectionController, :saved_credentials
+    get "/connections/:id/nodes", ConnectionController, :nodes
     delete "/connections/:id", ConnectionController, :delete
 
     # Workflows
@@ -69,6 +71,8 @@ defmodule NodepadApiWeb.Router do
     pipe_through [:api, :extension_auth]
 
     post "/sync/nodes", ExtensionController, :sync_nodes
+    post "/sync/credential-types", ExtensionController, :sync_credential_types
+    post "/sync/saved-credentials", ExtensionController, :sync_saved_credentials
   end
 
   if Application.compile_env(:nodepad_api, :dev_routes) do

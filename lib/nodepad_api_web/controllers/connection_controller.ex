@@ -67,6 +67,16 @@ defmodule NodepadApiWeb.ConnectionController do
     json(conn, creds)
   end
 
+  def saved_credentials(conn, %{"id" => id}) do
+    creds = Workspaces.list_saved_credentials(id)
+    json(conn, creds)
+  end
+
+  def nodes(conn, %{"id" => id}) do
+    nodes = Workspaces.list_nodes(id)
+    json(conn, nodes)
+  end
+
   def delete(conn, %{"id" => id}) do
     case Workspaces.get_connection(id) do
       nil -> conn |> put_status(:not_found) |> json(%{error: "Connection not found"})
